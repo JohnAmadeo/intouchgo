@@ -5,24 +5,24 @@ DROP TABLE letters;
 -- Assumes that drafts are stored on-device and never reach the cloud
 CREATE TABLE facilities (
     name VARCHAR PRIMARY KEY,
-    address VARCHAR NOT NULL
+    address VARCHAR NOT NULL CHECK (length(text) > 0)
 );
 
 CREATE TABLE inmates (
     id VARCHAR PRIMARY KEY,
-    firstName VARCHAR NOT NULL,
-    lastName VARCHAR NOT NULL,
-    inmateNumber VARCHAR,
+    firstName VARCHAR NOT NULL CHECK (length(text) > 0),
+    lastName VARCHAR NOT NULL CHECK (length(text) > 0),
+    inmateNumber VARCHAR NOT NULL CHECK (length(text) > 0),
     dateOfBirth DATE,
     facility VARCHAR REFERENCES facilities(name)
 );
 
 CREATE TABLE letters (
     id VARCHAR PRIMARY KEY,
-    author VARCHAR NOT NULL,
+    author VARCHAR NOT NULL CHECK (length(text) > 0),
     recipient VARCHAR NOT NULL REFERENCES inmates(id),
     subject VARCHAR,
-    text VARCHAR NOT NULL,
+    text VARCHAR NOT NULL CHECK (length(text) > 0),
     timeSent DATE NOT NULL,
     timeLastEdited DATE NOT NULL,
     isDraft BOOLEAN NOT NULL

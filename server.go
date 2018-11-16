@@ -8,6 +8,8 @@ import (
 )
 func main() {
 	serveMux := http.NewServeMux()
+	serveMux.Handle("/letter", getAuthHandler(createLetterHandler))
+	serveMux.Handle("/letters", getAuthHandler(lettersHandler))
 
 	port := os.Getenv("PORT")
 	if port == "" {

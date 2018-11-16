@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -16,6 +17,32 @@ type Letter struct {
 	TimeSent       string `json:"timeSent"`
 	TimeLastEdited string `json:"timeLastEdited"`
 	IsDraft        bool   `json:"isDraft"`
+}
+
+func createLetterInDB(letter Letter) error {
+	db, err := getDBConnection()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	_, err = db.Exec(
+		"INSERT INTO letters VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+		letter.Id,
+		letter.Author,
+		letter.RecipientId,
+		letter.Subject,
+		letter.Text,
+		letter.TimeSent,
+		letter.TimeLastEdited,
+		letter.IsDraft,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getLettersFromDB() ([]Letter, error) {
@@ -86,6 +113,42 @@ func getLettersFromDB() ([]Letter, error) {
 	return letters, nil
 }
 
+func createLetterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write(messageToBytes("Only POST requests are allowed at this route"))
+		return
+	}
+
+	bytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(messageToBytes("Malformed body."))
+		return
+	}
+	defer r.Body.Close()
+
+	var letter Letter
+	err = json.Unmarshal(bytes, &letter)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(messageToBytes("Request body must be a letter"))
+		return
+	}
+
+	err = createLetterInDB(letter)
+	if err != nil {
+		printErr(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(messageToBytes("Error inserting to DB: " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write(messageToBytes("Letter successfully created!"))
+}
+
 func lettersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" && r.Method != "" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -95,6 +158,7 @@ func lettersHandler(w http.ResponseWriter, r *http.Request) {
 
 	letters, err := getLettersFromDB()
 	if err != nil {
+		printErr(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(messageToBytes(err.Error()))
 		return
@@ -102,6 +166,7 @@ func lettersHandler(w http.ResponseWriter, r *http.Request) {
 
 	bytes, err := json.Marshal(letters)
 	if err != nil {
+		printErr(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(messageToBytes(err.Error()))
 		return

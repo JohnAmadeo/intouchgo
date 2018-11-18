@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	Domain   = "intouch-android.auth0.com"
-	ClientId = "UiMO3i34HawDk03M2D7hpu4A2fhJoIoh"
+	AuthConnection = "Username-Password-Authentication"
+	ClientId       = "UiMO3i34HawDk03M2D7hpu4A2fhJoIoh"
+	Domain         = "intouch-android.auth0.com"
 )
 
 type GetAccessTokenRequest struct {

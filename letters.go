@@ -45,8 +45,8 @@ func createLetterInDB(letter Letter) error {
 	return nil
 }
 
-func getLettersFromDB() ([]Letter, error) {
-	var letters []Letter
+func getLettersFromDB(username string) ([]Letter, error) {
+	letters := []Letter{}
 
 	db, err := getDBConnection()
 	if err != nil {
@@ -68,9 +68,10 @@ func getLettersFromDB() ([]Letter, error) {
 
 	query := "SELECT " + strings.Join(fields[:], ", ") + " " +
 		"FROM letters JOIN inmates " +
-		"ON letters.recipient = inmates.id"
+		"ON letters.recipient = inmates.id " +
+		"WHERE letters.author = $1"
 
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, username)
 	if err != nil {
 		return letters, err
 	}
@@ -156,7 +157,14 @@ func lettersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	letters, err := getLettersFromDB()
+	usernames, ok := r.URL.Query()["username"]
+	if !ok || len(usernames) > 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(messageToBytes("Request query parameters must contain a single username"))
+		return
+	}
+
+	letters, err := getLettersFromDB(usernames[0])
 	if err != nil {
 		printErr(err)
 		w.WriteHeader(http.StatusInternalServerError)

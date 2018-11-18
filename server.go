@@ -10,6 +10,7 @@ func main() {
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/letter", getAuthHandler(createLetterHandler))
 	serveMux.Handle("/letters", getAuthHandler(lettersHandler))
+	serveMux.Handle("/user", getAuthHandler(createUserHandler))
 
 	port := os.Getenv("PORT")
 	if port == "" {

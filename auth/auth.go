@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"encoding/json"
@@ -80,7 +80,7 @@ func verifyAudience(tokenClaims jwt.Claims, audience string) error {
 	return errors.New("Invalid audience")
 }
 
-func getAuthHandler(handler http.HandlerFunc) http.Handler {
+func GetAuthHandler(handler http.HandlerFunc) http.Handler {
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			checkAud := verifyAudience(token.Claims, Audience)

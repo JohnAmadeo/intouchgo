@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -9,11 +9,11 @@ type Message struct {
 	Message string
 }
 
-func messageToBytes(message string) []byte {
+func MessageToBytes(message string) []byte {
 	bytes, _ := json.Marshal(Message{message})
 	return bytes
 }
 
-func printErr(err error) {
+func PrintErr(err error) {
 	fmt.Println(err.Error())
 }

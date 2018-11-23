@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/johnamadeo/intouchgo/utils"
 )
 
 const (
@@ -128,10 +130,10 @@ func createUser(accessToken string, user User) error {
 	return nil
 }
 
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
+func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write(messageToBytes("Only POST requests are allowed at this route"))
+		w.Write(utils.MessageToBytes("Only POST requests are allowed at this route"))
 		return
 	}
 
@@ -139,7 +141,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(messageToBytes("Malformed body."))
+		w.Write(utils.MessageToBytes("Malformed body."))
 		return
 	}
 	defer r.Body.Close()
@@ -147,26 +149,26 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(bytes, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(messageToBytes("Request body must be a user."))
+		w.Write(utils.MessageToBytes("Request body must be a user."))
 		return
 	}
 
 	accessToken, err := getManagementAcessToken()
 	if err != nil {
-		printErr(err)
+		utils.PrintErr(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(messageToBytes("Failed to get Auth0 Management API access token to create user."))
+		w.Write(utils.MessageToBytes("Failed to get Auth0 Management API access token to create user."))
 		return
 	}
 
 	err = createUser(accessToken, user)
 	if err != nil {
-		printErr(err)
+		utils.PrintErr(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(messageToBytes("Failed to create user: " + err.Error()))
+		w.Write(utils.MessageToBytes("Failed to create user: " + err.Error()))
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write(messageToBytes("Successfully created user."))
+	w.Write(utils.MessageToBytes("Successfully created user."))
 }

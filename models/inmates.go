@@ -10,7 +10,8 @@ import (
 
 type Inmate struct {
 	Id           string `json:"id"`
-	Name         string `json:"name"`
+	FirstName    string `json:"firstName"`
+	LastName     string `json:"lastName"`
 	InmateNumber string `json:"inmateNumber"`
 	DateOfBirth  string `json:"dateOfBirth"`
 	Facility     string `json:"facility"`
@@ -27,17 +28,16 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 
 	fields := []string{
 		"inmates.id",
-		"CONCAT(inmates.firstName, ' ', inmates.lastName) AS name",
+		"inmates.firstName",
+		"inmates.lastName",
 		"inmates.inmateNumber",
 		"inmates.dateOfBirth",
 		"inmates.facility",
 	}
 
-	query := "SELECT * FROM (" +
-		"SELECT " + strings.Join(fields[:], ", ") + " " +
+	query := "SELECT " + strings.Join(fields[:], ", ") + " " +
 		"FROM inmates " +
-		") AS inmates " +
-		"WHERE UPPER(name) LIKE UPPER('%' || $1 || '%')"
+		"WHERE UPPER(CONCAT(firstName, ' ', lastName)) LIKE UPPER('%' || $1 || '%')"
 
 	rows, err := db.Query(query, searchQuery)
 	if err != nil {
@@ -46,10 +46,11 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, name, inmateNumber, dateOfBirth, facility string
+		var id, firstName, lastName, inmateNumber, dateOfBirth, facility string
 		err := rows.Scan(
 			&id,
-			&name,
+			&firstName,
+			&lastName,
 			&inmateNumber,
 			&dateOfBirth,
 			&facility,
@@ -61,7 +62,8 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 
 		inmate := Inmate{
 			Id:           id,
-			Name:         name,
+			FirstName:    firstName,
+			LastName:     lastName,
 			InmateNumber: inmateNumber,
 			DateOfBirth:  dateOfBirth,
 			Facility:     facility,

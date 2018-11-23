@@ -37,6 +37,18 @@ func findInmatesByLastName(letter string, html *string) chromedp.Tasks {
 	}
 }
 
+func formatName(rawName string) (string, string) {
+	names := strings.SplitN(rawName, ",", 2)
+
+	style := func(name string) string {
+		return strings.Title(strings.ToLower(strings.TrimSpace(name)))
+	}
+
+	firstName := style(names[1])
+	lastName := style(names[0])
+	return firstName, lastName
+}
+
 func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
 	inmates := []models.Inmate{}
 
@@ -51,14 +63,14 @@ func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
 		tds := nodeToSelection(tr).Find("td")
 
 		if len(tds.Nodes) == 4 {
-			var inmateNumber, name, dateOfBirth, facility string
+			var inmateNumber, firstName, lastName, dateOfBirth, facility string
 			for i, td := range tds.Nodes {
 				text := nodeToSelection(td).Text()
 				switch i {
 				case 0:
 					inmateNumber = text
 				case 1:
-					name = text
+					firstName, lastName = formatName(text)
 				case 2:
 					dateOfBirth = text
 				case 3:
@@ -68,7 +80,8 @@ func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
 
 			inmates = append(inmates, models.Inmate{
 				InmateNumber: inmateNumber,
-				Name:         name,
+				FirstName:    firstName,
+				LastName:     lastName,
 				DateOfBirth:  dateOfBirth,
 				Facility:     facility,
 			})
@@ -86,7 +99,7 @@ func nodeToSelection(node *html.Node) *goquery.Selection {
 
 func printInmates(inmates []models.Inmate) {
 	if len(inmates) > 0 {
-		fmt.Println(inmates[0].Name[:1], " : ", len(inmates))
+		fmt.Println(inmates[0].FirstName[:1], " : ", len(inmates))
 	}
 }
 

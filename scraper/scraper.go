@@ -144,4 +144,15 @@ func main() {
 	}
 
 	fmt.Println("All: ", len(inmates))
+
+	err = chrome.Shutdown(ctxt)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chrome.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

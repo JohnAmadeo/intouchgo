@@ -99,7 +99,7 @@ func nodeToSelection(node *html.Node) *goquery.Selection {
 
 func printInmates(inmates []models.Inmate) {
 	if len(inmates) > 0 {
-		fmt.Println(inmates[0].FirstName[:1], " : ", len(inmates))
+		fmt.Println(inmates[0].LastName[:1], " : ", len(inmates))
 	}
 }
 

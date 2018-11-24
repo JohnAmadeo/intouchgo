@@ -188,10 +188,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// inmates = []models.Inmate{}
-	// inmates = append(inmates, models.Inmate{"asdf-polk-tyub", "CT", "AA903", "Jake", "Wharton", "02/11/94", "CT Prison 3", true})
-	// inmates = append(inmates, models.Inmate{"123a-1das-mmji", "CT", "AA296", "Marlene", "Enrique", "01/05/78", "CT Prison 3", true})
-
 	err = models.SaveInmatesFromScraper(inmates)
 	if err != nil {
 		log.Fatal(err)

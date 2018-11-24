@@ -1,23 +1,42 @@
 package models
 
 import (
-	"encoding/json"
-	"net/http"
-	"strings"
-
-	"github.com/johnamadeo/intouchgo/utils"
+	"log"
 )
 
 type Inmate struct {
 	Id           string `json:"id"`
+	State        string `json:"state"`
+	InmateNumber string `json:"inmateNumber"`
 	FirstName    string `json:"firstName"`
 	LastName     string `json:"lastName"`
-	InmateNumber string `json:"inmateNumber"`
 	DateOfBirth  string `json:"dateOfBirth"`
 	Facility     string `json:"facility"`
+	Active       bool   `json:"active"`
 }
 
-func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
+type InmateKey struct {
+	State, InmateNumber string
+}
+
+func getKey(inmate Inmate) InmateKey {
+	return InmateKey{
+		State:        inmate.State,
+		InmateNumber: inmate.InmateNumber,
+	}
+}
+
+func getInmatesKeySet(inmates []Inmate) map[InmateKey]interface{} {
+	ids := make(map[InmateKey]interface{})
+
+	for _, inmate := range inmates {
+		ids[getKey(inmate)] = nil
+	}
+
+	return ids
+}
+
+func GetInmatesFromDB(searchQuery string) ([]Inmate, error) {
 	inmates := []Inmate{}
 
 	db, err := getDBConnection()
@@ -26,16 +45,7 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 	}
 	defer db.Close()
 
-	fields := []string{
-		"inmates.id",
-		"inmates.firstName",
-		"inmates.lastName",
-		"inmates.inmateNumber",
-		"inmates.dateOfBirth",
-		"inmates.facility",
-	}
-
-	query := "SELECT " + strings.Join(fields[:], ", ") + " " +
+	query := "SELECT * " +
 		"FROM inmates " +
 		"WHERE UPPER(CONCAT(firstName, ' ', lastName)) LIKE UPPER('%' || $1 || '%')"
 
@@ -46,14 +56,17 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id, firstName, lastName, inmateNumber, dateOfBirth, facility string
+		var id, state, inmateNumber, firstName, lastName, dateOfBirth, facility string
+		var active bool
 		err := rows.Scan(
 			&id,
+			&state,
+			&inmateNumber,
 			&firstName,
 			&lastName,
-			&inmateNumber,
 			&dateOfBirth,
 			&facility,
+			&active,
 		)
 
 		if err != nil {
@@ -62,11 +75,13 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 
 		inmate := Inmate{
 			Id:           id,
+			State:        state,
+			InmateNumber: inmateNumber,
 			FirstName:    firstName,
 			LastName:     lastName,
-			InmateNumber: inmateNumber,
 			DateOfBirth:  dateOfBirth,
 			Facility:     facility,
+			Active:       active,
 		}
 
 		inmates = append(inmates, inmate)
@@ -75,39 +90,82 @@ func getInmatesFromDB(searchQuery string) ([]Inmate, error) {
 	return inmates, nil
 }
 
-/*
-curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJqVTJRVEZFTTBVeU5EazFRalk1TmtFM05UazVOak0xUVVJeVFUWTRPVEZGUVVJeFJEY3lOdyJ9.eyJpc3MiOiJodHRwczovL2ludG91Y2gtYW5kcm9pZC5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWJkODk1MWEzZGRjYjQwNWQzYWM2Y2RjIiwiYXVkIjpbImh0dHBzOi8vaW50b3VjaC1hbmRyb2lkLWJhY2tlbmQuaGVyb2t1YXBwLmNvbS8iLCJodHRwczovL2ludG91Y2gtYW5kcm9pZC5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNTQyNTA3MTM2LCJleHAiOjE1NDI1OTM1MzYsImF6cCI6InpjVU54OGxQQVE2djhVSXB4OTIwVkdvVTVnMmplNXl6Iiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCBvZmZsaW5lX2FjY2VzcyJ9.kNFhzrMJ75jPjWufClOm8oXYTGIGEZHnmDGOV0Hu-T8r_ObtFhngsT1QoqI8-6Y2jIyKJyKUc4ySbfS9PRAeYaulntnFlvdcJXJK6M5_gNizSS84ROgb6vHVBxdZ6YfIIS3iQbf51g2xJs-jRWWwyb1_Shr8Fnt0fxOu_D_KBt82GiQWdJgePT-SVKMRrmZno_4aq07-YFxdJppLbfQIeMz4a4kApBHQ1ZKPZ6qrUcZ1xPKqd3dTMXrMtWAvkISGp31zTPEbm-40t4xIWgfHOXK20WJ-KZ4zV7nczmYHMNqdxx2ww5J9xc2vXah2ITPJagQUlQH6ZqrOsmGC4ZJcGA" http://localhost:8080/inmates
-*/
-func InmatesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" && r.Method != "" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write(utils.MessageToBytes("Only GET requests are allowed at this route"))
-		return
-	}
-
-	queries, ok := r.URL.Query()["query"]
-	if !ok || len(queries) > 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(utils.MessageToBytes("Request query parameters must contain a single username"))
-		return
-	}
-
-	inmates, err := getInmatesFromDB(queries[0])
+func SaveInmatesFromScraper(scraperInmates []Inmate) error {
+	dbInmates, err := GetInmatesFromDB("")
 	if err != nil {
-		utils.PrintErr(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes(err.Error()))
-		return
+		return err
 	}
 
-	bytes, err := json.Marshal(inmates)
+	scraperIds := getInmatesKeySet(scraperInmates)
+	dbIds := getInmatesKeySet(dbInmates)
+
+	db, err := getDBConnection()
 	if err != nil {
-		utils.PrintErr(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes(err.Error()))
-		return
+		return err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(bytes)
+	// Loop through all existing inmates in DB and mark them as inactive if they
+	// are no longer on the website
+	for _, dbInmate := range dbInmates {
+		if _, ok := scraperIds[getKey(dbInmate)]; !ok {
+			_, err = tx.Exec(
+				"UPDATE inmates SET active = false WHERE state = $1 AND inmateNumber = $2",
+				dbInmate.State,
+				dbInmate.InmateNumber,
+			)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	// TODO: Batch inserts and updates for better performance
+
+	// Insert all new inmates, and update existing inmates by marking them as
+	// active and updating their facility
+	for _, scraperInmate := range scraperInmates {
+		if _, ok := dbIds[getKey(scraperInmate)]; !ok {
+			_, err := tx.Exec(
+				"INSERT INTO inmates VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+				scraperInmate.Id,
+				scraperInmate.State,
+				scraperInmate.InmateNumber,
+				scraperInmate.FirstName,
+				scraperInmate.LastName,
+				scraperInmate.DateOfBirth,
+				scraperInmate.Facility,
+				scraperInmate.Active,
+			)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		} else {
+			_, err = tx.Exec(
+				"UPDATE inmates "+
+					"SET active = true, facility = $1 "+
+					"WHERE state = $2 AND inmateNumber = $3",
+				scraperInmate.Facility,
+				scraperInmate.State,
+				scraperInmate.InmateNumber,
+			)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }

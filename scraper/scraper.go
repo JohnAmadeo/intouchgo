@@ -9,6 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/chromedp"
+	"github.com/google/uuid"
 	"github.com/johnamadeo/intouchgo/models"
 	"golang.org/x/net/html"
 )
@@ -20,7 +21,7 @@ const (
 	CTSubmitButton  = "#submit1"
 	CTInmateTable   = "table[summary='Result.']"
 
-	AlphabetSize = 26
+	AlphabetSize = 1
 )
 
 func findInmatesByLastName(letter string, html *string) chromedp.Tasks {
@@ -79,11 +80,14 @@ func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
 			}
 
 			inmates = append(inmates, models.Inmate{
+				Id:           uuid.New().String(),
+				State:        "CT",
 				InmateNumber: inmateNumber,
 				FirstName:    firstName,
 				LastName:     lastName,
 				DateOfBirth:  dateOfBirth,
 				Facility:     facility,
+				Active:       true,
 			})
 		}
 	}
@@ -155,4 +159,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// inmates = []models.Inmate{}
+	// inmates = append(inmates, models.Inmate{"asdf-polk-tyub", "CT", "AA903", "Jake", "Wharton", "02/11/94", "CT Prison 3", true})
+	// inmates = append(inmates, models.Inmate{"123a-1das-mmji", "CT", "AA296", "Marlene", "Enrique", "01/05/78", "CT Prison 3", true})
+
+	err = models.SaveInmatesFromScraper(inmates)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

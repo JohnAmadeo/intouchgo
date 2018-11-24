@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/johnamadeo/intouchgo/utils"
 )
 
 const (
@@ -45,7 +43,7 @@ type User struct {
 	Password string `json:"placeholderPassword"`
 }
 
-func getManagementAcessToken() (string, error) {
+func GetManagementAcessToken() (string, error) {
 	url := "https://" + Domain + "/oauth/token"
 	secret, ok := os.LookupEnv("AUTH0_INTOUCH_CLIENT_SECRET")
 	if !ok {
@@ -87,7 +85,7 @@ func getManagementAcessToken() (string, error) {
 	return responseBody.AccessToken, nil
 }
 
-func createUser(accessToken string, user User) error {
+func CreateUser(accessToken string, user User) error {
 	url := "https://" + Domain + "/api/v2/users"
 	body := CreateUserRequest{
 		Connection:  AuthConnection,
@@ -128,47 +126,4 @@ func createUser(accessToken string, user User) error {
 	}
 
 	return nil
-}
-
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write(utils.MessageToBytes("Only POST requests are allowed at this route"))
-		return
-	}
-
-	var user User
-	bytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(utils.MessageToBytes("Malformed body."))
-		return
-	}
-	defer r.Body.Close()
-
-	err = json.Unmarshal(bytes, &user)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(utils.MessageToBytes("Request body must be a user."))
-		return
-	}
-
-	accessToken, err := getManagementAcessToken()
-	if err != nil {
-		utils.PrintErr(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes("Failed to get Auth0 Management API access token to create user."))
-		return
-	}
-
-	err = createUser(accessToken, user)
-	if err != nil {
-		utils.PrintErr(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes("Failed to create user: " + err.Error()))
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Write(utils.MessageToBytes("Successfully created user."))
 }

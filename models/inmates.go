@@ -19,6 +19,12 @@ type InmateKey struct {
 	State, InmateNumber string
 }
 
+type Facility struct {
+	Name      string
+	ShortName string
+	Address   string
+}
+
 func getKey(inmate Inmate) InmateKey {
 	return InmateKey{
 		State:        inmate.State,
@@ -34,6 +40,39 @@ func getInmatesKeySet(inmates []Inmate) map[InmateKey]interface{} {
 	}
 
 	return ids
+}
+
+func GetFacilitiesFromDB() ([]Facility, error) {
+	facilities := []Facility{}
+
+	db, err := getDBConnection()
+	if err != nil {
+		return facilities, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM facilities")
+	if err != nil {
+		return facilities, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var name, shortName, address string
+		err := rows.Scan(&name, &shortName, &address)
+
+		if err != nil {
+			return facilities, err
+		}
+
+		facilities = append(facilities, Facility{
+			Name:      name,
+			ShortName: shortName,
+			Address:   address,
+		})
+	}
+
+	return facilities, nil
 }
 
 func GetInmatesFromDB(searchQuery string) ([]Inmate, error) {

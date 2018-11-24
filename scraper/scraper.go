@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -21,36 +22,16 @@ const (
 	CTSubmitButton  = "#submit1"
 	CTInmateTable   = "table[summary='Result.']"
 
-	AlphabetSize = 1
+	CTParoleIndicator       = "PO-"
+	CTHalfwayHouseIndicator = "HOUSE"
+
+	AlphabetSize = 26
 )
 
-func findInmatesByLastName(letter string, html *string) chromedp.Tasks {
-	return chromedp.Tasks{
-		chromedp.Navigate(CTHomePage),
-		chromedp.WaitVisible(CTSearchForm, chromedp.NodeVisible),
-		chromedp.SendKeys(CTLastNameInput, letter),
-		chromedp.Click(CTSubmitButton, chromedp.NodeVisible),
-		// Wait for all the table rows to load; assumes the network connection
-		// is fast enough that this will occur after 1 second
-		chromedp.Sleep(1 * time.Second),
-		chromedp.WaitVisible(CTInmateTable, chromedp.NodeVisible),
-		chromedp.OuterHTML(CTInmateTable, html, chromedp.NodeVisible),
-	}
-}
-
-func formatName(rawName string) (string, string) {
-	names := strings.SplitN(rawName, ",", 2)
-
-	style := func(name string) string {
-		return strings.Title(strings.ToLower(strings.TrimSpace(name)))
-	}
-
-	firstName := style(names[1])
-	lastName := style(names[0])
-	return firstName, lastName
-}
-
-func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
+func extractInmatesFromHTML(
+	html string,
+	facilities []models.Facility,
+) ([]models.Inmate, error) {
 	inmates := []models.Inmate{}
 
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
@@ -79,38 +60,56 @@ func extractInmatesFromHTML(html string) ([]models.Inmate, error) {
 				}
 			}
 
-			inmates = append(inmates, models.Inmate{
-				Id:           uuid.New().String(),
-				State:        "CT",
-				InmateNumber: inmateNumber,
-				FirstName:    firstName,
-				LastName:     lastName,
-				DateOfBirth:  dateOfBirth,
-				Facility:     facility,
-				Active:       true,
-			})
+			if facility, err := getFacilityKey(facility, facilities); err == nil {
+				inmates = append(inmates, models.Inmate{
+					Id:           uuid.New().String(),
+					State:        "CT",
+					InmateNumber: inmateNumber,
+					FirstName:    firstName,
+					LastName:     lastName,
+					DateOfBirth:  dateOfBirth,
+					Facility:     facility,
+					Active:       true,
+				})
+			}
+
 		}
 	}
 
 	return inmates, nil
 }
 
-func nodeToSelection(node *html.Node) *goquery.Selection {
-	return &goquery.Selection{
-		Nodes: []*html.Node{node},
+func findInmatesByLastName(letter string, html *string) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.Navigate(CTHomePage),
+		chromedp.WaitVisible(CTSearchForm, chromedp.NodeVisible),
+		chromedp.SendKeys(CTLastNameInput, letter),
+		chromedp.Click(CTSubmitButton, chromedp.NodeVisible),
+		// Wait for all the table rows to load; assumes the network connection
+		// is fast enough that this will occur after 1 second
+		chromedp.Sleep(1 * time.Second),
+		chromedp.WaitVisible(CTInmateTable, chromedp.NodeVisible),
+		chromedp.OuterHTML(CTInmateTable, html, chromedp.NodeVisible),
 	}
 }
 
-func printInmates(inmates []models.Inmate) {
-	if len(inmates) > 0 {
-		fmt.Println(inmates[0].LastName[:1], " : ", len(inmates))
-	}
+func capitalize(str string) string {
+	return strings.Title(strings.ToLower(strings.TrimSpace(str)))
+}
+
+func formatName(rawName string) (string, string) {
+	names := strings.SplitN(rawName, ",", 2)
+
+	firstName := capitalize(names[1])
+	lastName := capitalize(names[0])
+	return firstName, lastName
 }
 
 func getInmatesByLastName(
 	ctxt context.Context,
 	chrome *chromedp.CDP,
 	letter string,
+	facilities []models.Facility,
 ) []models.Inmate {
 	fmt.Println("Scraping all inmates whose last name start with " + letter)
 
@@ -121,13 +120,38 @@ func getInmatesByLastName(
 		return []models.Inmate{}
 	}
 
-	inmates, err := extractInmatesFromHTML(html)
+	inmates, err := extractInmatesFromHTML(html, facilities)
 	if err != nil {
 		fmt.Println(err)
 		return []models.Inmate{}
 	}
 
 	return inmates
+}
+
+func nodeToSelection(node *html.Node) *goquery.Selection {
+	return &goquery.Selection{
+		Nodes: []*html.Node{node},
+	}
+}
+
+func getFacilityKey(
+	facility string,
+	facilities []models.Facility,
+) (string, error) {
+	for _, validFacility := range facilities {
+		if strings.Contains(facility, strings.ToUpper(validFacility.ShortName)) {
+			return validFacility.Name, nil
+		}
+	}
+
+	return "", errors.New(facility + " is not a valid CT correctional facility")
+}
+
+func printInmates(inmates []models.Inmate) {
+	if len(inmates) > 0 {
+		fmt.Println(inmates[0].LastName[:1], " : ", len(inmates))
+	}
 }
 
 func main() {
@@ -139,10 +163,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	facilities, err := models.GetFacilitiesFromDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	inmates := []models.Inmate{}
 	for i := 65; i < 65+AlphabetSize; i++ {
 		letter := string(i)
-		letterInmates := getInmatesByLastName(ctxt, chrome, letter)
+		letterInmates := getInmatesByLastName(ctxt, chrome, letter, facilities)
 		printInmates(letterInmates)
 		inmates = append(inmates, letterInmates...)
 	}

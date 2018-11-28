@@ -22,9 +22,6 @@ const (
 	CTSubmitButton  = "#submit1"
 	CTInmateTable   = "table[summary='Result.']"
 
-	CTParoleIndicator       = "PO-"
-	CTHalfwayHouseIndicator = "HOUSE"
-
 	AlphabetSize = 26
 )
 

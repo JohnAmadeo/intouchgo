@@ -36,16 +36,24 @@ func CreateLetterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.CreateLetterInDB(letter)
+	letter, err = models.SendLetter(letter)
 	if err != nil {
 		utils.PrintErr(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes("Error inserting to DB: " + err.Error()))
+		w.Write(utils.MessageToBytes("Error creating letter: " + err.Error()))
+		return
+	}
+
+	bytes, err = json.Marshal(letter)
+	if err != nil {
+		utils.PrintErr(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(utils.MessageToBytes(err.Error()))
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write(utils.MessageToBytes("Letter successfully created!"))
+	w.Write(bytes)
 }
 
 /*

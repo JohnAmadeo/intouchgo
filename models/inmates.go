@@ -1,7 +1,10 @@
 package models
 
 import (
+	"errors"
 	"log"
+
+	"github.com/johnamadeo/intouchgo/lob"
 )
 
 type Inmate struct {
@@ -20,9 +23,14 @@ type InmateKey struct {
 }
 
 type Facility struct {
-	Name      string
-	ShortName string
-	Address   string
+	Name             string
+	ShortName        string
+	AddressLine      string
+	City             string
+	State            string
+	Zip              string
+	LobTestAddressId string
+	LobLiveAddressId string
 }
 
 func getKey(inmate Inmate) InmateKey {
@@ -58,21 +66,68 @@ func GetFacilitiesFromDB() ([]Facility, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var name, shortName, address string
-		err := rows.Scan(&name, &shortName, &address)
+		var name, shortName, addressLine, city, state, zip, lobTestAddressId, lobLiveAddressId string
+		err := rows.Scan(&name, &shortName, &addressLine, &city, &state, &zip, &lobTestAddressId, &lobLiveAddressId)
 
 		if err != nil {
 			return facilities, err
 		}
 
 		facilities = append(facilities, Facility{
-			Name:      name,
-			ShortName: shortName,
-			Address:   address,
+			Name:             name,
+			ShortName:        shortName,
+			AddressLine:      addressLine,
+			City:             city,
+			State:            state,
+			Zip:              zip,
+			LobTestAddressId: lobTestAddressId,
+			LobLiveAddressId: lobLiveAddressId,
 		})
 	}
 
 	return facilities, nil
+}
+
+func GetInmateAddress(inmateId string, lobEnvironment string) (string, error) {
+	db, err := getDBConnection()
+	if err != nil {
+		return "", err
+	}
+	defer db.Close()
+
+	addressType := ""
+	switch lobEnvironment {
+	case lob.LobTestEnvironment:
+		addressType = "facilities.lobTestAddressId"
+	case lob.LobLiveEnvironment:
+		addressType = "facilities.lobLiveAddressId"
+	default:
+		return "", errors.New(lob.LobInvalidEnvironmentError)
+	}
+
+	rows, err := db.Query(
+		"SELECT "+addressType+" FROM inmates JOIN facilities ON inmates.facility = facilities.name WHERE inmates.id = $1",
+		inmateId,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	addressId := ""
+	for rows.Next() {
+		err := rows.Scan(&addressId)
+		if err != nil {
+			return "", err
+		}
+
+		break
+	}
+
+	if addressId == "" {
+		return "", errors.New("No inmate with requested id found.")
+	}
+	return addressId, nil
 }
 
 func GetInmatesFromDB(searchQuery string) ([]Inmate, error) {

@@ -69,6 +69,7 @@ func GetLettersFromDB(username string) ([]Letter, error) {
 			&timeLastEdited,
 			&timeDeliveredEstimate,
 			&isDraft,
+			&lobLetterId,
 		)
 
 		if err != nil {

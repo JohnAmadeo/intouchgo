@@ -4,13 +4,226 @@
 	"GodepVersion": "v80",
 	"Deps": [
 		{
+			"ImportPath": "github.com/PuerkitoBio/goquery",
+			"Comment": "v1.5.0",
+			"Rev": "2d2796f41742ece03e8086188fa4db16a3a0b458"
+		},
+		{
+			"ImportPath": "github.com/andybalholm/cascadia",
+			"Comment": "v1.0.0-2-g680b6a5",
+			"Rev": "680b6a57bda4f657485ad44bdea42342ead737bc"
+		},
+		{
 			"ImportPath": "github.com/auth0/go-jwt-middleware",
 			"Rev": "5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/accessibility",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/animation",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/applicationcache",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/audits",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/browser",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/cachestorage",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/cdp",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/css",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/database",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/debugger",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/deviceorientation",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/dom",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/domdebugger",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/domsnapshot",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/domstorage",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/emulation",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/fetch",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/headlessexperimental",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/heapprofiler",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/indexeddb",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/input",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/inspector",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/io",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/layertree",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/log",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/memory",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/network",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/overlay",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/page",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/performance",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/profiler",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/runtime",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/security",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/serviceworker",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/storage",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/systeminfo",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/target",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/testing",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/tethering",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/cdproto/tracing",
+			"Rev": "26b5fa12673f33b2c9d36f64d040eca17f3959f3"
+		},
+		{
+			"ImportPath": "github.com/chromedp/chromedp",
+			"Comment": "v0.1.2-1-gbf52fed",
+			"Rev": "bf52fed0d3e6fc1acb7096f4748fec335fcb5547"
+		},
+		{
+			"ImportPath": "github.com/chromedp/chromedp/client",
+			"Comment": "v0.1.2-1-gbf52fed",
+			"Rev": "bf52fed0d3e6fc1acb7096f4748fec335fcb5547"
+		},
+		{
+			"ImportPath": "github.com/chromedp/chromedp/kb",
+			"Comment": "v0.1.2-1-gbf52fed",
+			"Rev": "bf52fed0d3e6fc1acb7096f4748fec335fcb5547"
+		},
+		{
+			"ImportPath": "github.com/chromedp/chromedp/runner",
+			"Comment": "v0.1.2-1-gbf52fed",
+			"Rev": "bf52fed0d3e6fc1acb7096f4748fec335fcb5547"
 		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
 			"Comment": "v3.2.0-4-g3af4c74",
 			"Rev": "3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8"
+		},
+		{
+			"ImportPath": "github.com/disintegration/imaging",
+			"Comment": "v1.5.0-8-g9458da5",
+			"Rev": "9458da53d1e65e098d48467a4317c403327e4424"
+		},
+		{
+			"ImportPath": "github.com/google/uuid",
+			"Comment": "1.0.0-8-g9b3b1e0",
+			"Rev": "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Comment": "v1.4.0-5-g483fb8d",
+			"Rev": "483fb8d7c32fcb4b5636cd293a92e3935932e2f4"
+		},
+		{
+			"ImportPath": "github.com/knq/sysutil",
+			"Rev": "0218e141a794643e8c0fa283b9cd076fc0df662d"
 		},
 		{
 			"ImportPath": "github.com/lib/pq",
@@ -21,6 +234,42 @@
 			"ImportPath": "github.com/lib/pq/oid",
 			"Comment": "v1.0.0-6-g9eb73ef",
 			"Rev": "9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson",
+			"Rev": "60711f1a8329503b04e1c88535f419d0bb440bff"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/buffer",
+			"Rev": "60711f1a8329503b04e1c88535f419d0bb440bff"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/jlexer",
+			"Rev": "60711f1a8329503b04e1c88535f419d0bb440bff"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/jwriter",
+			"Rev": "60711f1a8329503b04e1c88535f419d0bb440bff"
+		},
+		{
+			"ImportPath": "golang.org/x/image/bmp",
+			"Rev": "cd38e8056d9b27bb2f265effa37fb0ea6b8a7f0f"
+		},
+		{
+			"ImportPath": "golang.org/x/image/tiff",
+			"Rev": "cd38e8056d9b27bb2f265effa37fb0ea6b8a7f0f"
+		},
+		{
+			"ImportPath": "golang.org/x/image/tiff/lzw",
+			"Rev": "cd38e8056d9b27bb2f265effa37fb0ea6b8a7f0f"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/atom",
+			"Rev": "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
 		}
 	]
 }

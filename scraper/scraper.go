@@ -1,10 +1,9 @@
-package main
+package scraper
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -151,18 +150,18 @@ func printInmates(inmates []models.Inmate) {
 	}
 }
 
-func main() {
+func ScrapeInmates() error {
 	ctxt, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	chrome, err := chromedp.New(ctxt /*chromedp.WithLog(log.Printf)*/)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	facilities, err := models.GetFacilitiesFromDB()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	inmates := []models.Inmate{}
@@ -177,16 +176,18 @@ func main() {
 
 	err = chrome.Shutdown(ctxt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = chrome.Wait()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = models.SaveInmatesFromScraper(inmates)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }

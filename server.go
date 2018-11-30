@@ -15,6 +15,7 @@ func main() {
 	serveMux.Handle("/letter", auth.GetAuthHandler(routes.CreateLetterHandler))
 	serveMux.Handle("/letters", auth.GetAuthHandler(routes.LettersHandler))
 	serveMux.Handle("/user", auth.GetAuthHandler(routes.CreateUserHandler))
+	serveMux.Handle("/", http.FileServer(http.Dir("./static")))
 
 	port := os.Getenv("PORT")
 	if port == "" {

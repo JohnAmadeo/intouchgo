@@ -115,3 +115,7 @@ func GetAuthHandler(handler http.HandlerFunc) http.Handler {
 
 	return jwtMiddleware.Handler(handler)
 }
+
+func GetFakeAuthHandler(handler http.HandlerFunc) http.Handler {
+	return handler
+}

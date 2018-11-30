@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/johnamadeo/intouchgo/lob"
@@ -261,5 +262,6 @@ func SaveInmatesFromScraper(scraperInmates []Inmate) error {
 		return err
 	}
 
+	fmt.Println("Update all inmates in DB")
 	return nil
 }

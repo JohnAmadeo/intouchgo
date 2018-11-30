@@ -21,6 +21,7 @@ func main() {
 		fmt.Println("Running scraper")
 		err := scraper.ScrapeInmates()
 		if err != nil {
+			fmt.Println(err.Error())
 			log.Fatal(err)
 		}
 		// }

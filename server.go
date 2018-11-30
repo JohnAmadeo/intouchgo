@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ func main() {
 	if len(os.Args) >= 2 && os.Args[1] == "--scraper" {
 		// the Heroku scheduler can only schedule jobs on a daily or hourly basis
 		// if time.Now().Weekday() == time.Sunday {
+		fmt.Println("Running scraper")
 		err := scraper.ScrapeInmates()
 		if err != nil {
 			log.Fatal(err)

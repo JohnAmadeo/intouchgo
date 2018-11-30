@@ -33,6 +33,7 @@ func main() {
 		serveMux.Handle("/user", auth.GetAuthHandler(routes.CreateUserHandler))
 		serveMux.Handle("/", http.FileServer(http.Dir("./static")))
 
+		serveMux.Handle("/test/letters", auth.GetFakeAuthHandler(routes.LettersHandler))
 		serveMux.Handle("/test/facilities", auth.GetFakeAuthHandler(func(w http.ResponseWriter, r *http.Request) {
 			facilities, err := models.GetFacilitiesFromDB()
 			if err != nil {

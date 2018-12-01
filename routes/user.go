@@ -32,15 +32,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := models.GetManagementAcessToken()
-	if err != nil {
-		utils.PrintErr(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(utils.MessageToBytes("Failed to get Auth0 Management API access token to create user."))
-		return
-	}
-
-	err = models.CreateUser(accessToken, user)
+	err = models.CreateUser(user)
 	if err != nil {
 		utils.PrintErr(err)
 		w.WriteHeader(http.StatusInternalServerError)

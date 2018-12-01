@@ -212,6 +212,11 @@
 			"Rev": "9458da53d1e65e098d48467a4317c403327e4424"
 		},
 		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Comment": "v1.0.0",
+			"Rev": "44c6ddd0a2342c386950e880b658017258da92fc"
+		},
+		{
 			"ImportPath": "github.com/google/uuid",
 			"Comment": "1.0.0-8-g9b3b1e0",
 			"Rev": "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"

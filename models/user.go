@@ -3,10 +3,13 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -37,55 +40,91 @@ type CreateUserRequest struct {
 	VerifyEmail bool   `json:"verify_email"`
 }
 
+type GetUserRealNameParams struct {
+	SearchEngine string `url:"search_engine"`
+	Query        string `url:"q"`
+}
+
+type Auth0User struct {
+	Email        string          `json:"email"`
+	Username     string          `json:"username"`
+	UserMetadata Auth0UserMedata `json:"user_metadata"`
+}
+
+type Auth0UserMedata struct {
+	Name string `json:"name"`
+}
+
 type User struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"placeholderPassword"`
 }
 
-func GetManagementAcessToken() (string, error) {
-	url := "https://" + Domain + "/oauth/token"
-	secret, ok := os.LookupEnv("AUTH0_INTOUCH_CLIENT_SECRET")
-	if !ok {
-		return "", errors.New("Client secret doesn't exist as an environment variable")
-	}
-
-	request := GetAccessTokenRequest{
-		GrantType:    "client_credentials",
-		ClientId:     ClientId,
-		ClientSecret: secret,
-		Audience:     "https://" + Domain + "/api/v2/",
-	}
-
-	bytes, err := json.Marshal(request)
+func GetUserRealName(username string) (string, error) {
+	accessToken, err := getManagementAcessToken()
 	if err != nil {
 		return "", err
 	}
 
-	payload := strings.NewReader(string(bytes))
-
-	response, err := http.Post(url, "application/json", payload)
+	url := "https://" + Domain + "/api/v2/users"
+	values, err := query.Values(GetUserRealNameParams{
+		SearchEngine: "v3",
+		Query:        `username:"` + username + `"`,
+	})
 	if err != nil {
 		return "", err
 	}
 
-	bytes, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return "", err
-	}
-	defer response.Body.Close()
+	params := values.Encode()
 
-	var responseBody GetAccessTokenResponse
-	err = json.Unmarshal(bytes, &responseBody)
-
+	request, err := http.NewRequest("GET", url+"?"+params, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return responseBody.AccessToken, nil
+	request.Header.Add("content-type", "application/json")
+	request.Header.Add("authorization", "Bearer "+accessToken)
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", err
+	}
+
+	if response.StatusCode != 200 {
+		bytes, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return "", err
+		}
+
+		fmt.Printf("%d, %s", response.StatusCode, string(bytes))
+		return "", errors.New("Status Code: " + string(response.StatusCode))
+	}
+
+	bytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var users []Auth0User
+	err = json.Unmarshal(bytes, &users)
+	if err != nil {
+		return "", err
+	}
+
+	if len(users) == 0 {
+		return "", errors.New("No users with given username found")
+	}
+
+	return users[0].UserMetadata.Name, nil
 }
 
-func CreateUser(accessToken string, user User) error {
+func CreateUser(user User) error {
+	accessToken, err := getManagementAcessToken()
+	if err != nil {
+		return err
+	}
+
 	url := "https://" + Domain + "/api/v2/users"
 	body := CreateUserRequest{
 		Connection:  AuthConnection,
@@ -126,4 +165,46 @@ func CreateUser(accessToken string, user User) error {
 	}
 
 	return nil
+}
+
+func getManagementAcessToken() (string, error) {
+	url := "https://" + Domain + "/oauth/token"
+	secret, ok := os.LookupEnv("AUTH0_INTOUCH_CLIENT_SECRET")
+	if !ok {
+		return "", errors.New("Client secret doesn't exist as an environment variable")
+	}
+
+	request := GetAccessTokenRequest{
+		GrantType:    "client_credentials",
+		ClientId:     ClientId,
+		ClientSecret: secret,
+		Audience:     "https://" + Domain + "/api/v2/",
+	}
+
+	bytes, err := json.Marshal(request)
+	if err != nil {
+		return "", err
+	}
+
+	payload := strings.NewReader(string(bytes))
+
+	response, err := http.Post(url, "application/json", payload)
+	if err != nil {
+		return "", err
+	}
+
+	bytes, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var responseBody GetAccessTokenResponse
+	err = json.Unmarshal(bytes, &responseBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	return responseBody.AccessToken, nil
 }

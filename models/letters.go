@@ -164,6 +164,11 @@ func sendLetterToLob(letter Letter, lobEnvironment string) (lob.LobSendLetterRes
 		return response, err
 	}
 
+	authorName, err := GetUserRealName(letter.Author)
+	if err != nil {
+		return response, err
+	}
+
 	request := lob.LobSendLetterRequest{
 		Color:    false,
 		MailType: lob.USPSStandard,
@@ -171,7 +176,7 @@ func sendLetterToLob(letter Letter, lobEnvironment string) (lob.LobSendLetterRes
 		To:       inmateAddressId,
 		File:     htmlString,
 		MergeVariables: map[string]string{
-			"author":    letter.Author,
+			"author":    authorName,
 			"recipient": letter.Recipient,
 			"subject":   letter.Subject,
 			"timeSent":  letter.TimeSent,

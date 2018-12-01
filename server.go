@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/johnamadeo/intouchgo/auth"
 	"github.com/johnamadeo/intouchgo/models"
@@ -17,14 +18,15 @@ import (
 func main() {
 	if len(os.Args) >= 2 && os.Args[1] == "--scraper" {
 		// the Heroku scheduler can only schedule jobs on a daily or hourly basis
-		// if time.Now().Weekday() == time.Sunday {
-		fmt.Println("Running scraper")
-		err := scraper.ScrapeInmates()
-		if err != nil {
-			fmt.Println(err.Error())
-			log.Fatal(err)
+		// so we need an additional check to ensure the scraper is run weekly
+		if time.Now().Weekday() == time.Sunday {
+			fmt.Println("Running scraper")
+			err := scraper.ScrapeInmates()
+			if err != nil {
+				fmt.Println(err.Error())
+				log.Fatal(err)
+			}
 		}
-		// }
 	} else {
 		serveMux := http.NewServeMux()
 		serveMux.Handle("/inmates", auth.GetAuthHandler(routes.InmatesHandler))

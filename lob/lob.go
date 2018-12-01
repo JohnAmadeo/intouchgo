@@ -78,15 +78,23 @@ func GetLetterHTMLTemplate(letterText string) (string, error) {
 	return htmlString, nil
 }
 
-func LobDateToDBDate(date string) string {
-	return strings.Join(strings.Split(date, "-"), "/")
+// Converts YYYY-MM-DD to MM-DD-YY
+func LobDateToDBDate(date string) (string, error) {
+	parts := strings.Split(date, "-")
+	if len(parts) != 3 || len(parts[0]) != 4 {
+		return "", errors.New("Date string is not formatted as YYYY-MM-DD")
+	}
+
+	return strings.Join(
+		[]string{parts[1], parts[2], parts[0][2:]},
+		"/",
+	), nil
 }
 
 // Post performs a POST request to the Lob API.
 func Post(endpoint string, params map[string]string, returnValue interface{}, environment string) error {
 	fullURL := LobBaseAPI + endpoint
 	fmt.Println("Lob POST ", fullURL)
-	fmt.Println(params)
 
 	var body io.Reader
 	if params != nil {

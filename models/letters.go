@@ -102,7 +102,12 @@ func SendLetter(letter Letter) (Letter, error) {
 		return Letter{}, err
 	}
 
-	letter.TimeDeliveredEstimate = lob.LobDateToDBDate(response.ExpectedDeliveryDate)
+	date, err := lob.LobDateToDBDate(response.ExpectedDeliveryDate)
+	if err != nil {
+		return Letter{}, err
+	}
+
+	letter.TimeDeliveredEstimate = date
 	letter.LobLetterId = response.Id
 
 	err = createLetterInDB(letter)

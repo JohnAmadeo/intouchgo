@@ -112,13 +112,11 @@ func getInmatesByLastName(
 	var html string
 	err := chrome.Run(ctxt, findInmatesByLastName(letter, &html))
 	if err != nil {
-		fmt.Println(err)
 		return []models.Inmate{}
 	}
 
 	inmates, err := extractInmatesFromHTML(html, facilities)
 	if err != nil {
-		fmt.Println(err)
 		return []models.Inmate{}
 	}
 
@@ -144,7 +142,7 @@ func getFacilityKey(
 	return "", errors.New(facility + " is not a valid CT correctional facility")
 }
 
-func printInmates(inmates []models.Inmate) {
+func printInmateBatchSize(inmates []models.Inmate) {
 	if len(inmates) > 0 {
 		fmt.Println(inmates[0].LastName[:1], " : ", len(inmates))
 	}
@@ -168,7 +166,7 @@ func ScrapeInmates() error {
 	for i := 65; i < 65+AlphabetSize; i++ {
 		letter := string(i)
 		letterInmates := getInmatesByLastName(ctxt, chrome, letter, facilities)
-		printInmates(letterInmates)
+		printInmateBatchSize(letterInmates)
 		inmates = append(inmates, letterInmates...)
 	}
 

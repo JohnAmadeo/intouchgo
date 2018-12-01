@@ -75,8 +75,6 @@ func GetLetterHTMLTemplate(letterText string) (string, error) {
 	parts := strings.Split(htmlString, "{{text}}")
 	htmlString = parts[0] + letterText + parts[1]
 
-	fmt.Println(htmlString)
-
 	return htmlString, nil
 }
 
@@ -88,7 +86,6 @@ func LobDateToDBDate(date string) string {
 func Post(endpoint string, params map[string]string, returnValue interface{}, environment string) error {
 	fullURL := LobBaseAPI + endpoint
 	fmt.Println("Lob POST ", fullURL)
-
 	fmt.Println(params)
 
 	var body io.Reader

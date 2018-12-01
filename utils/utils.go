@@ -33,7 +33,6 @@ func JSONToForm(v interface{}) map[string]string {
 		if fv == nil {
 			continue
 		}
-		fmt.Println(name)
 		switch x := fv.(type) {
 		case *string:
 			if x != nil {
